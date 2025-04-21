@@ -1,53 +1,55 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Check, ChevronsUpDown, Brain, Image, Video, Gamepad2, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/ui/avatar";
+import { ChevronDown, Plus } from "lucide-react";
+
+export type AICapability = "text" | "image" | "video" | "game" | "code";
 
 export interface AIModel {
   id: string;
   name: string;
-  description: string;
-  capabilities: Array<"text" | "image" | "video" | "code" | "game">;
+  description?: string;
+  capabilities: AICapability[];
   avatar: string;
 }
 
-const predefinedModels: AIModel[] = [
+export const AvailableModels: AIModel[] = [
   {
     id: "gpt4",
     name: "Умник",
     description: "Совершенная текстовая модель для общения и создания контента",
-    capabilities: ["text", "code"],
-    avatar: "/placeholder.svg"
+    capabilities: ["text", "code", "image", "video", "game"],
+    avatar: "/placeholder.svg",
   },
   {
-    id: "dalle3",
+    id: "stable-diffusion",
     name: "Художник",
-    description: "Генерирует реалистичные изображения по описанию",
+    description: "Специализированная модель для создания изображений",
     capabilities: ["text", "image"],
-    avatar: "/placeholder.svg"
+    avatar: "/placeholder.svg",
   },
   {
-    id: "midjourney",
-    name: "Творец",
-    description: "Создает художественные изображения в разных стилях",
-    capabilities: ["text", "image"],
-    avatar: "/placeholder.svg"
-  },
-  {
-    id: "videogen",
-    name: "Режиссер",
-    description: "Генерирует короткие видеоролики по текстовому описанию",
+    id: "video-gen",
+    name: "Режиссёр",
+    description: "Генерирует видеоролики по вашему описанию",
     capabilities: ["text", "video"],
-    avatar: "/placeholder.svg"
+    avatar: "/placeholder.svg",
   },
   {
-    id: "gamecreator",
-    name: "Разработчик",
-    description: "Создает простые игры по вашему сценарию",
+    id: "coder",
+    name: "Программист",
+    description: "Специализируется на написании и анализе кода",
     capabilities: ["text", "code", "game"],
-    avatar: "/placeholder.svg"
+    avatar: "/placeholder.svg",
   }
 ];
 
@@ -62,77 +64,78 @@ export const AISelector = ({
   onSelectModel,
   onCreateCustomAI
 }: AISelectorProps) => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          <div className="flex items-center gap-2">
-            <img 
-              src={selectedModel.avatar} 
-              alt={selectedModel.name} 
-              className="h-5 w-5 rounded-full"
-            />
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="w-full justify-between">
+          <span className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <img src={selectedModel.avatar} alt={selectedModel.name} />
+            </Avatar>
             <span>{selectedModel.name}</span>
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Найти нейросеть..." />
-          <CommandList>
-            <CommandEmpty>Ничего не найдено.</CommandEmpty>
-            <CommandGroup heading="Доступные нейросети">
-              {predefinedModels.map((model) => (
-                <CommandItem
-                  key={model.id}
-                  value={model.id}
-                  onSelect={() => {
-                    onSelectModel(model);
-                    setOpen(false);
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <img 
-                    src={model.avatar} 
-                    alt={model.name} 
-                    className="h-6 w-6 rounded-full"
-                  />
-                  <div className="flex flex-col">
-                    <span>{model.name}</span>
-                    <span className="text-xs text-muted-foreground">{model.description}</span>
-                  </div>
-                  <div className="ml-auto flex gap-1">
-                    {model.capabilities.includes("text") && <Brain className="h-3 w-3 text-muted-foreground" />}
-                    {model.capabilities.includes("image") && <Image className="h-3 w-3 text-muted-foreground" />}
-                    {model.capabilities.includes("video") && <Video className="h-3 w-3 text-muted-foreground" />}
-                    {model.capabilities.includes("game") && <Gamepad2 className="h-3 w-3 text-muted-foreground" />}
-                  </div>
-                  <Check
-                    className={cn(
-                      "ml-1 h-4 w-4",
-                      selectedModel.id === model.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            <CommandGroup heading="Свой ИИ">
-              <CommandItem onSelect={onCreateCustomAI}>
-                <Plus className="mr-2 h-4 w-4" />
-                <span>Создать новую нейросеть</span>
-              </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[260px]">
+        <DropdownMenuLabel>Выберите модель</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {AvailableModels.map((model) => (
+          <DropdownMenuItem
+            key={model.id}
+            className="flex flex-col items-start py-2 cursor-pointer"
+            onClick={() => {
+              onSelectModel(model);
+              setIsOpen(false);
+            }}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Avatar className="h-8 w-8">
+                <img src={model.avatar} alt={model.name} />
+              </Avatar>
+              <div className="flex-1">
+                <div className="font-medium">{model.name}</div>
+                <div className="text-xs text-muted-foreground line-clamp-1">
+                  {model.description}
+                </div>
+              </div>
+              {model.id === selectedModel.id && (
+                <Badge variant="outline" className="ml-auto">Выбрано</Badge>
+              )}
+            </div>
+            <div className="flex gap-1 mt-2">
+              {model.capabilities.includes("text") && (
+                <Badge variant="secondary" className="text-xs">Текст</Badge>
+              )}
+              {model.capabilities.includes("image") && (
+                <Badge variant="secondary" className="text-xs">Фото</Badge>
+              )}
+              {model.capabilities.includes("video") && (
+                <Badge variant="secondary" className="text-xs">Видео</Badge>
+              )}
+              {model.capabilities.includes("game") && (
+                <Badge variant="secondary" className="text-xs">Игры</Badge>
+              )}
+              {model.capabilities.includes("code") && (
+                <Badge variant="secondary" className="text-xs">Код</Badge>
+              )}
+            </div>
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer" 
+          onClick={() => {
+            onCreateCustomAI();
+            setIsOpen(false);
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          <span>Создать свою модель</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
